@@ -7,7 +7,7 @@ from transformers import AutoTokenizer
 from peft import TaskType, LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from peft.utils import TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING
 
-from .dataset.dataset import *
+from dataset_util.dataset import *
 import datetime
 
 # 定义全局变量和参数
