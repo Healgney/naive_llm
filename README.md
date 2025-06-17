@@ -83,6 +83,6 @@ python train.py --config finetune_config.json
 ```
 
 
-## 前端交互：
+## 💁🏻‍♂️ 前端交互：
 
 ![周易问答示例](./screenshot.jpeg)
