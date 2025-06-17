@@ -15,7 +15,7 @@
     ├── inference/
     │ └──chatbox_demo.py
     ├── train.py
-    ├── README.md 
+    ├── README.md
     └── requirements.txt
 
 ## 🧠 模型简介：ChatGLM3-6B
@@ -81,3 +81,8 @@ pip install -r requirements.txt
 ```bash
 python train.py --config finetune_config.json
 ```
+
+
+## 前端交互：
+
+![周易问答示例](./assets/screenshot.jpeg)
