@@ -1,5 +1,6 @@
 
 models
 .DS_Store
+.idea
 .ipynb_checkpoints
 */.ipynb_checkpoints
