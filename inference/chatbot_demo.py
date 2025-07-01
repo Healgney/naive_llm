@@ -1,8 +1,21 @@
-from transformers import AutoModel, AutoTokenizer
+
 import gradio as gr
 from peft import PeftModel, PeftConfig
 import mdtex2html
 
+from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer, AutoModel
+import faiss
+import torch
+import json
+
+# 1️⃣ 加载检索模型（embedding）
+embed_model = SentenceTransformer("shibing624/text2vec-base-chinese")
+
+# 2️⃣ 加载向量索引
+index = faiss.read_index("data/zhouyi_index.faiss")
+with open("data/zhouyi_meta.json", "r", encoding="utf-8") as f:
+    meta_data = json.load(f)
 
 model_path = "/home/healgney/Documents/huggingface/hub/models--THUDM--chatglm3-6b/snapshots/e9e0406d062cdb887444fe5bd546833920abd4ac"
 peft_model_path = "/home/healgney/Documents/LLM_NaiveFinetune_demo/models/chatglm3-6b-epoch3-20250611_230752/checkpoint-50"
@@ -14,6 +27,25 @@ model.eval()
 
 """Override Chatbot.postprocess"""
 
+# 4️⃣ 构造带检索信息的 prompt
+def build_prompt(contexts, user_question):
+    context_str = "\n".join([f"【知识】{c['text']}" for c in contexts])
+    prompt = f"{context_str}\n\n【问题】{user_question}\n【回答】"
+    return prompt
+
+# 5️⃣ 检索模块
+def retrieve_docs(query, top_k=3):
+    query_emb = embed_model.encode([query])
+    D, I = index.search(query_emb, top_k)
+    return [meta_data[i] for i in I[0]]
+
+# 6️⃣ 主函数：RAG 推理
+def rag_ask(question):
+    related_docs = retrieve_docs(question)
+    prompt = build_prompt(related_docs, question)
+
+    response, _ = model.chat(tokenizer, prompt, history=[])
+    return response
 
 def postprocess(self, y):
     if y is None:
@@ -104,3 +136,9 @@ with gr.Blocks() as demo:
     emptyBtn.click(reset_state, outputs=[chatbot, history], show_progress=True)
 
 demo.queue().launch(share=False, inbrowser=True)
+
+# 7️⃣ 测试
+if __name__ == "__main__":
+    query = "请解释蒙卦中“童蒙求我”的意思"
+    answer = rag_ask(query)
+    print(f"\n🧠 问题：{query}\n📘 回答：{answer}")

@@ -19,7 +19,7 @@ chat = ChatOpenAI(model="gpt-4o-mini",
 raw_content_data = []
 
 # 读取文件并分割数据样例
-with open('raw_data.txt', 'r', encoding='utf-8') as file:
+with open('../data/raw/raw_data.txt', 'r', encoding='utf-8') as file:
     content = file.read()
     # 使用连续的换行符('\n\n')作为分隔符来分割文本
     data_samples = content.split('\n\n')
@@ -143,7 +143,7 @@ def main():
 
     # 解析 data_gen/raw_data.txt 得到 raw_content_data 列表
     raw_content_data = []
-    with open('raw_data.txt', 'r', encoding='utf-8') as file:
+    with open('../data/raw/raw_data.txt', 'r', encoding='utf-8') as file:
         content = file.read()
         data_samples = content.split('\n\n')
         for sample in data_samples:

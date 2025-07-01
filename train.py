@@ -12,7 +12,7 @@ import datetime
 
 # 定义全局变量和参数
 model_name_or_path = 'THUDM/chatglm3-6b'                            # 模型ID或本地路径
-train_data_path = 'data_gen/zhouyi_dataset_20240118_163659.csv'     # 训练数据路径(批量生成数据集）
+train_data_path = 'data/zhouyi_dataset_20240118_163659.csv'  # 训练数据路径(批量生成数据集）
 eval_data_path = None                                               # 验证数据路径，如果没有则设置为None
 seed = 8                                                            # 随机种子
 lora_rank = 16                                                      # LoRA秩
