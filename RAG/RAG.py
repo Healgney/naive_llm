@@ -14,6 +14,7 @@ from transformers import (
 from sklearn.metrics import f1_score
 from bert_score import score as bert_score
 
+import pandas as pd
 #TODO: 多模态Retrieve（图片）
 
 class DocProcessor:
@@ -221,7 +222,7 @@ class Evaluater:
         """
         rag_answers = [self.rag_model.ask(q) for q in questions]
         if metric == "bertscore":
-            P, R, F1 = bert_score(rag_answers, references, lang="zh", rescale_with_baseline=True)
+            P, R, F1 = bert_score(rag_answers, references, lang="zh", rescale_with_baseline=True, verbose=True)
             return [{"question": q, "rag_answer": a, "reference": r, "bertscore": f.item()} 
                     for q, a, r, f in zip(questions, rag_answers, references, F1)]
         # 可扩展更多指标
@@ -251,20 +252,28 @@ def main():
     model_name_or_path = "../sft_merged_model"
     # cache_dir="../Qwen_model_file"
     rag = EnhancedRAG(model_name_or_path)
-    question1 = "崔某作为个体工商户，在税务人员征税过程中采取暴力抗拒行为，并故意将热油泼向围观群众，导致一名群众重伤。请问上述行为是否构成故意伤害罪？请给出详细的推理过程之后再给出答案。"
-    question2 = "小明冒用了别人的信用卡进行消费，数额较大，是否构成信用卡诈骗罪？"
-    question3 = "某公司将大量液态废物走私进境，企图从中获取不当利益。海关查获后，该公司及其负责主管人员被起诉。对于该公司及其负责主管人员，按照什么规定处罚走私液态废物的行为？"
-    question4 = "小明是某银行的员工，他利用职务上的便利，收受客户回扣，将钱财占为己有。小明的行为构成什么罪？应该如何处罚？"
-    question5 = "甲公司为了获取国有企业A的业务，在接触中向A公司领导的亲戚赠送大量礼物，后甲公司成功获得A公司的业务。根据相关法律法规，甲公司是否已经违法？"
-    prompt = [question1, question2, question3, question4, question5]
-    for i in range(len(prompt)):
-        answer = rag.ask(prompt[i])
-        print(f"prompt{i + 1}：{prompt[i]}")
-        print(f"response：{answer}")
+    # question1 = "崔某作为个体工商户，在税务人员征税过程中采取暴力抗拒行为，并故意将热油泼向围观群众，导致一名群众重伤。请问上述行为是否构成故意伤害罪？请给出详细的推理过程之后再给出答案。"
+    # question2 = "小明冒用了别人的信用卡进行消费，数额较大，是否构成信用卡诈骗罪？"
+    # question3 = "某公司将大量液态废物走私进境，企图从中获取不当利益。海关查获后，该公司及其负责主管人员被起诉。对于该公司及其负责主管人员，按照什么规定处罚走私液态废物的行为？"
+    # question4 = "小明是某银行的员工，他利用职务上的便利，收受客户回扣，将钱财占为己有。小明的行为构成什么罪？应该如何处罚？"
+    # question5 = "甲公司为了获取国有企业A的业务，在接触中向A公司领导的亲戚赠送大量礼物，后甲公司成功获得A公司的业务。根据相关法律法规，甲公司是否已经违法？"
+    # prompt = [question1, question2, question3, question4, question5]
+    # for i in range(len(prompt)):
+    #     answer = rag.ask(prompt[i])
+    #     print(f"prompt{i + 1}：{prompt[i]}")
+    #     print(f"response：{answer}")
 
     # rag = EnhancedRAG(...)
-    questions = [...]
-    references = [...]
+
+    # 读取csv文件
+    df = pd.read_csv('your_file.csv')  # 替换为你的csv文件路径
+
+    # 随机选择5条
+    sampled = df.sample(n=5, random_state=None)
+
+    # 获取问题和答案列表
+    questions = sampled['content'].tolist()
+    references = sampled['summary'].tolist()
     evaluator = Evaluater(rag_model=rag)
     bertscore_results = evaluator.evaluate_with_reference(questions, references)
     print(bertscore_results)
