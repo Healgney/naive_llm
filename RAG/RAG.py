@@ -11,6 +11,8 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
 )
+from sklearn.metrics import f1_score
+from bert_score import score as bert_score
 
 #TODO: 多模态Retrieve（图片）
 
@@ -97,7 +99,9 @@ class Retriever:
     def __init__(self, chunks):
         self.vector_db = Chroma.from_documents(
             chunks,
-            embedding=HuggingFaceEmbeddings(model_name="BAAI/bge-large-zh-v1.5"),
+            embedding=HuggingFaceEmbeddings(
+                model_name="BAAI/bge-large-zh-v1.5" #bge-small-zh
+            ),
             persist_directory="./vector_db"
         )
 
@@ -199,6 +203,49 @@ class EnhancedRAG:
         response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
         return response
 
+class Evaluater:
+    def __init__(self, rag_model, eval_llm=None):
+        """
+        rag_model: EnhancedRAG 实例
+        eval_llm: 可选，评测用的大模型（如ChatGPT API封装），用于主观打分
+        """
+        self.rag_model = rag_model
+        self.eval_llm = eval_llm
+
+    def evaluate_with_reference(self, questions, references, metric="bertscore"):
+        """
+        questions: 问题列表
+        references: 参考答案列表
+        metric: "bertscore" 或 "rouge" 等
+        返回每个问题的分数
+        """
+        rag_answers = [self.rag_model.ask(q) for q in questions]
+        if metric == "bertscore":
+            P, R, F1 = bert_score(rag_answers, references, lang="zh", rescale_with_baseline=True)
+            return [{"question": q, "rag_answer": a, "reference": r, "bertscore": f.item()} 
+                    for q, a, r, f in zip(questions, rag_answers, references, F1)]
+        # 可扩展更多指标
+        else:
+            raise NotImplementedError("只实现了bertscore")
+
+    def evaluate_with_llm(self, questions, references=None, prompt_template=None):
+        """
+        用大模型主观评测RAG答案质量
+        prompt_template: 可选，str，插入{question}、{rag_answer}、{reference}
+        """
+        if self.eval_llm is None:
+            raise ValueError("未提供评测用大模型")
+        rag_answers = [self.rag_model.ask(q) for q in questions]
+        results = []
+        for i, (q, a) in enumerate(zip(questions, rag_answers)):
+            if references:
+                prompt = prompt_template.format(question=q, rag_answer=a, reference=references[i])
+            else:
+                prompt = prompt_template.format(question=q, rag_answer=a)
+            score = self.eval_llm(prompt)  # 假设eval_llm返回分数或评价
+            results.append({"question": q, "rag_answer": a, "score": score})
+        return results
+
 
 def main():
     model_name_or_path = "../sft_merged_model"
@@ -214,6 +261,18 @@ def main():
         answer = rag.ask(prompt[i])
         print(f"prompt{i + 1}：{prompt[i]}")
         print(f"response：{answer}")
+
+    # rag = EnhancedRAG(...)
+    questions = [...]
+    references = [...]
+    evaluator = Evaluater(rag_model=rag)
+    bertscore_results = evaluator.evaluate_with_reference(questions, references)
+    print(bertscore_results)
+
+    # 如果有 LLM 评测接口
+    # def gpt_judge(prompt): ...
+    # evaluator = Evaluater(rag_model=rag, eval_llm=gpt_judge)
+    # results = evaluator.evaluate_with_llm(questions, references, prompt_template="请为以下问答打分...")
 
 
 if __name__ == '__main__':
