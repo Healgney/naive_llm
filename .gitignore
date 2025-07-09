@@ -4,3 +4,13 @@ models
 .idea
 .ipynb_checkpoints
 */.ipynb_checkpoints
+/data/gen_data4rag.py
+/data/vec_db
+
+evaluation_results_20250709_142619.json
+evaluation_results_20250709_155741.json
+evaluation_results_20250709_162532.json
+evaluation_results_20250709_162852.json
+evaluation_results_20250709_163500.json
+gen_data4rag.py
+ssh.py

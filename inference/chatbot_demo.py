@@ -17,7 +17,7 @@ index = faiss.read_index("data/zhouyi_index.faiss")
 with open("data/zhouyi_meta.json", "r", encoding="utf-8") as f:
     meta_data = json.load(f)
 
-model_path = "/home/healgney/Documents/huggingface/hub/models--THUDM--chatglm3-6b/snapshots/e9e0406d062cdb887444fe5bd546833920abd4ac"
+model_path = "/home/healgney/Documents/huggingface/hub/models--resources--chatglm3-6b/snapshots/e9e0406d062cdb887444fe5bd546833920abd4ac"
 peft_model_path = "/home/healgney/Documents/LLM_NaiveFinetune_demo/models/chatglm3-6b-epoch3-20250611_230752/checkpoint-50"
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)

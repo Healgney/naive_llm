@@ -11,7 +11,7 @@ from dataset_util.dataset import *
 import datetime
 
 # 定义全局变量和参数
-model_name_or_path = 'THUDM/chatglm3-6b'                            # 模型ID或本地路径
+model_name_or_path = '/root/autodl-tmp/huggingface/hub/models--THUDM--chatglm3-6b/snapshots/e9e0406d062cdb887444fe5bd546833920abd4ac'  # 模型ID或本地路径
 train_data_path = 'data/zhouyi_dataset_20240118_163659.csv'  # 训练数据路径(批量生成数据集）
 eval_data_path = None                                               # 验证数据路径，如果没有则设置为None
 seed = 8                                                            # 随机种子
@@ -35,7 +35,7 @@ def prepare_model():
     # 加载量化后模型
     model = AutoModel.from_pretrained(model_name_or_path,
                                       quantization_config=q_config,
-                                      device_map='auto',
+                                      # device_map='cuda:0',
                                       trust_remote_code=True,
                                       revision='b098244')
 
@@ -84,8 +84,8 @@ if __name__=='__main__':
     tokenized_dataset = tokenize_dataset(dataset, tokenizer)
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    train_epochs = 3
-    output_dir = f"models/{model_name_or_path}-epoch{train_epochs}-{timestamp}"
+    train_epochs = 10
+    output_dir = f"/root/llm_NaiveFinetune/models/epoch{train_epochs}-{timestamp}"
 
     training_args = TrainingArguments(
         output_dir=output_dir,          # 输出目录
