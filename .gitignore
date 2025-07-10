@@ -6,7 +6,7 @@ models
 */.ipynb_checkpoints
 /data/gen_data4rag.py
 /data/vec_db
-
+RAG/demo
 evaluation_results_20250709_142619.json
 evaluation_results_20250709_155741.json
 evaluation_results_20250709_162532.json
